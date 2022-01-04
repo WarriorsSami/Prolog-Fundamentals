@@ -1,114 +1,112 @@
-% 2 lists => which one is the list with the most elements?
+% 2 ordered lists => merge them into one list
 
-length_list([], 0).
-length_list([_ | Xs], N) :-
-    length(Xs, N1),
-    N is N1 + 1.
+merge([], L, L).
+merge(L, [], L).
+merge([H1 | T1], [H2 | T2], [H1 | T]) :-
+    H1 =< H2,
+    merge(T1, [H2 | T2], T).
+merge([H1 | T1], [H2 | T2], [H2 | T]) :-
+    H1 >= H2,
+    merge([H1 | T1], T2, T).
 
-longest_list(L1, L2, L1) :-
-    length(L1, N1),
-    length(L2, N2),
-    N1 >= N2.
-longest_list(L1, L2, L2) :-
-    length(L1, N1),
-    length(L2, N2),
-    N1 < N2.
+% 1 list => split it into two lists: one of odd numbers, one of even numbers
 
-% 1 list => list with the elements on even positions
+split_value([], [], []).
+split_value([H | T], [H | T1], T2) :-
+    0 is H mod 2,
+    split_value(T, T1, T2).
+split_value([H | T], T1, [H | T2]) :-
+    1 is H mod 2,
+    split_value(T, T1, T2).
 
-drop_even_positions([], _, []).
-drop_even_positions([X | Xs], CurrentIndex, [X | Rs]) :-
-    CurrentIndex mod 2 =:= 0,
-    NewCurrentIndex is CurrentIndex + 1,
-    drop_even_positions(Xs, NewCurrentIndex, Rs).
-drop_even_positions([_ | Xs], CurrentIndex, Rs) :-
-    NewCurrentIndex is CurrentIndex + 1,
-    drop_even_positions(Xs, NewCurrentIndex, Rs).
+% 1 list => split it into two lists: one of numbers from even positions, one of numbers from odd positions
 
-% 1 list, x, y => check if x and y are consecutive elements of the list
+split_position([], _, [], []).
+split_position([H | T], Count, [H | T1], T2) :-
+    0 is Count mod 2,
+    NewCount is Count + 1,
+    split_position(T, NewCount, T1, T2).
+split_position([H | T], Count, T1, [H | T2]) :-
+    1 is Count mod 2,
+    NewCount is Count + 1,
+    split_position(T, NewCount, T1, T2).
 
-are_consecutive([Y, X | _], X, Y).
-are_consecutive([X, Y | _], X, Y).
-are_consecutive([_ | Xs], X, Y) :-
-    are_consecutive(Xs, X, Y).
+% 1 value, 1 list => append the value to the list
 
-% 1 list => check if the list can be considered as a set
+last_append([], X, [X]).
+last_append([H | T], X, [H | T1]) :-
+    last_append(T, X, T1).
 
-is_in(X, [X | _]).
-is_in(X, [_ | Xs]) :-
-    is_in(X, Xs).
+% 1 position, 1 list => return the value at the position in the list
 
-is_set([]).
-is_set([X | Xs]) :-
-    not(member(X, Xs)),
-    is_set(Xs).
+get_value(0, [H | _], H).
+get_value(N, [_ | T], X) :-
+    N > 0,
+    NewN is N - 1,
+    get_value(NewN, T, X).
 
-% 1 list => turn a list into a set
+% 1 value, 1 list => return the position of the value in the list
 
-% unordered set
-make_set([], []).
-make_set([X | Xs], [X | Rs]) :-
-    not(member(X, Xs)),
-    make_set(Xs, Rs).
-make_set([_ | Xs], Rs) :-
-    make_set(Xs, Rs).
+get_position(X, [X | _], 0).
+get_position(X, [_ | T], N) :-
+    get_position(X, T, NewN),
+    N is NewN + 1.
 
-% quick sort
-sort_list(List, Sorted) :- 
-    q_sort(List, [], Sorted).
+% generate list of prime numbers until given value
 
-q_sort([], Acc, Acc).
-q_sort([X | Xs], Acc, Sorted):-
-	pivoting(X, Xs, L1, L2),
-    % greater than the pivot
-	q_sort(L2, Acc, Sorted1),
-    % lesser than the pivot
-    q_sort(L1, [X | Sorted1], Sorted).
+:- [lab6].
 
-% detach elements in corresponding lists of
-% smaller and greater than the pivot
-pivoting(_, [], [], []).
-% attach to the list with lesser elements
-pivoting(H, [X | T], [X | L], G):-
-    X =< H,
-    pivoting(H, T, L, G).
-% attach to the list with greater elements
-pivoting(H, [X | T], L, [X | G]):-
-    X > H,
-    pivoting(H, T, L, G).
+generate_prime_list(N, N, [N]) :-
+    isPrime(N).
+generate_prime_list(N, N, []).
+generate_prime_list(N, M, [N | T]) :-
+    isPrime(N),
+    N1 is N + 1,
+    generate_prime_list(N1, M, T).
+generate_prime_list(N, M, T) :-
+    N1 is N + 1,
+    generate_prime_list(N1, M, T).
 
-% ordered set
-make_ordered_set(L, Sorted) :-
-    make_set(L, L1),
-    sort_list(L1, Sorted).
+generate_list(N, N, [N]).
+generate_list(N, M, [N | T]) :-
+    N1 is N + 1,
+    generate_list(N1, M, T).
 
-% 2 lists => check if the first is a prefix of the second
+% 2 sets => union of the sets
 
-is_prefix([], _).
-is_prefix([X | Xs], [X | Ys]) :-
-    is_prefix(Xs, Ys).
+:- [lab9].
 
-% 2 lists => check if the first is a suffix of the second
+make_union_util([], L, L).
+make_union_util(L, [], L).
+make_union_util([H1 | T1], [H2 | T2], [H1, H2 | T]) :-
+    make_union_util(T1, T2, T).
 
-is_suffix(L, L).
-is_suffix(L1, [_ | L2]) :-
-    is_suffix(L1, L2).
+make_union(L1, L2, L) :-
+    make_union_util(L1, L2, Lt),
+    sort_list(Lt, L).
 
-% 2 lists => check if the first is a sublist of the second
+% 2 sets => intersection of the sets
 
-is_sublist(L1, L2) :-
-    is_prefix(L, L2),
-    is_suffix(L1, L).
+make_intersection_util([], _, []).
+make_intersection_util([H1 | T1], L2, [H1 | T]) :-
+    member(H1, L2),
+    make_intersection_util(T1, L2, T).
+make_intersection_util([_ | T1], L2, T) :-
+    make_intersection_util(T1, L2, T).
 
-% 2 lists => scalar product of the two lists
+make_intersection(L1, L2, L) :-
+    make_intersection_util(L1, L2, Lt),
+    sort_list(Lt, L).
 
-scalar_product(L1, L2, Result) :-
-    length(L1, N1),
-    length(L2, N2),
-    N1 = N2,
-    compute_scalar_product(L1, L2, Result).
+% 2 sets => difference of the sets
 
-compute_scalar_product([], [], 0).
-compute_scalar_product([X | Xs], [Y | Ys], Result) :-
-    compute_scalar_product(Xs, Ys, Result1),
-    Result is X * Y + Result1.
+make_difference_util([], _, []).
+make_difference_util([H1 | T1], L2, [H1 | T]) :-
+    not(member(H1, L2)),
+    make_difference_util(T1, L2, T).
+make_difference_util([_ | T1], L2, T) :-
+    make_difference_util(T1, L2, T).
+
+make_difference(L1, L2, L) :-
+    make_difference_util(L1, L2, Lt),
+    sort_list(Lt, L).
