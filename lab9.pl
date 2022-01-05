@@ -74,7 +74,7 @@ generate_list(N, M, [N | T]) :-
 
 % 2 sets => union of the sets
 
-:- [lab9].
+:- [lab8].
 
 make_union_util([], L, L).
 make_union_util(L, [], L).
