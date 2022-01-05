@@ -59,9 +59,9 @@ sort_list(List, Sorted) :-
 
 q_sort([], Acc, Acc).
 q_sort([X | Xs], Acc, Sorted):-
-	pivoting(X, Xs, L1, L2),
+    pivoting(X, Xs, L1, L2),
     % greater than the pivot
-	q_sort(L2, Acc, Sorted1),
+    q_sort(L2, Acc, Sorted1),
     % lesser than the pivot
     q_sort(L1, [X | Sorted1], Sorted).
 
